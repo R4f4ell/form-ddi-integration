@@ -1,1 +1,123 @@
+@use './variables';
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(135, 151, 164, 0.28), transparent 20%),
+    radial-gradient(circle at 88% 16%, rgba(201, 191, 176, 0.32), transparent 18%),
+    radial-gradient(circle at 72% 76%, rgba(126, 144, 162, 0.18), transparent 24%),
+    linear-gradient(135deg, #f7f3ec 0%, #ede5d8 48%, #f5efe7 100%);
+  color: var(--color-ink);
+  font-family:
+    "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.form-page {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  max-width: 1180px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+
+.form-page::before,
+.form-page::after {
+  position: absolute;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+.form-page::before {
+  top: 5%;
+  right: 8%;
+  width: 18rem;
+  height: 18rem;
+  background:
+    radial-gradient(circle, rgba(170, 183, 193, 0.24), rgba(170, 183, 193, 0.04) 48%, transparent 72%);
+}
+
+.form-page::after {
+  bottom: 4%;
+  left: -2%;
+  width: 22rem;
+  height: 22rem;
+  background:
+    radial-gradient(circle, rgba(214, 203, 189, 0.38), rgba(214, 203, 189, 0.06) 52%, transparent 75%);
+}
+
+.form-page__hero {
+  position: relative;
+  z-index: 1;
+  max-width: 32rem;
+}
+
+.form-page__eyebrow {
+  margin: 0 0 0.9rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.form-page__title {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(2.6rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.06em;
+  text-wrap: balance;
+}
+
+.form-page__description {
+  max-width: 24rem;
+  margin: 1.5rem 0 0;
+  color: var(--color-ink-soft);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 920px) {
+  .form-page {
+    padding-block: 2rem;
+    grid-template-columns: 1fr;
+  }
+
+  .form-page__hero {
+    max-width: none;
+  }
+}
