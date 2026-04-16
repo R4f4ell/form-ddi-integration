@@ -19,11 +19,15 @@ type FormState = {
   countryDdi: string
 }
 
+function getDefaultCountryDdi(countries: CountryOption[]) {
+  return countries.find((country) => country.ddi === '+55')?.ddi ?? countries[0]?.ddi ?? ''
+}
+
 const initialFormState = (countries: CountryOption[]): FormState => ({
   name: '',
   email: '',
   phone: '',
-  countryDdi: countries[0]?.ddi ?? '',
+  countryDdi: getDefaultCountryDdi(countries),
 })
 
 function formatPhoneValue(value: string) {
@@ -70,6 +74,23 @@ function CountryForm({ countries }: CountryFormProps) {
       document.removeEventListener('mousedown', handlePointerDown)
     }
   }, [])
+
+  useEffect(() => {
+    if (!countries.length) {
+      return
+    }
+
+    setFormData((currentState) => {
+      if (currentState.countryDdi) {
+        return currentState
+      }
+
+      return {
+        ...currentState,
+        countryDdi: getDefaultCountryDdi(countries),
+      }
+    })
+  }, [countries])
 
   function handleFieldChange(field: keyof FormState, value: string) {
     setFormData((currentState) => ({
@@ -119,9 +140,9 @@ function CountryForm({ countries }: CountryFormProps) {
               onChange={(event) => handleFieldChange('email', event.target.value)}
             />
           </label>
-
+O
           <label className="country-form__field">
-            <span>Telefone</span>
+            <span>Telefone (WhatsApp)</span>
 
             <div className="country-form__phone-shell" ref={dropdownRef}>
               <button
@@ -154,7 +175,7 @@ function CountryForm({ countries }: CountryFormProps) {
               <input
                 type="tel"
                 inputMode="numeric"
-                placeholder="(DDD) 99999-9999"
+                placeholder="(99) 99999-9999"
                 value={formData.phone}
                 onChange={(event) => handleFieldChange('phone', event.target.value)}
               />

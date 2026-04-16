@@ -1,32 +1,38 @@
+import { useEffect, useState } from 'react'
+
 import CountryForm, {
   type CountryOption,
 } from '../components/CountryForm/CountryForm'
+import { getCountries } from '../lib/lib_api'
 import '../styles/global.scss'
 
-const mockedCountries: CountryOption[] = [
-  {
-    name: 'Brasil',
-    ddi: '+55',
-    flag: 'https://country-code.com/flags/br.png',
-  },
-  {
-    name: 'Portugal',
-    ddi: '+351',
-    flag: 'https://country-code.com/flags/pt.png',
-  },
-  {
-    name: 'Estados Unidos',
-    ddi: '+1',
-    flag: 'https://country-code.com/flags/us.png',
-  },
-  {
-    name: 'Reino Unido',
-    ddi: '+44',
-    flag: 'https://country-code.com/flags/gb.png',
-  },
-]
-
 function Form() {
+  const [countries, setCountries] = useState<CountryOption[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadCountries() {
+      try {
+        const countriesResponse = await getCountries()
+
+        if (isMounted) {
+          setCountries(countriesResponse)
+        }
+      } catch {
+        if (isMounted) {
+          setCountries([])
+        }
+      }
+    }
+
+    void loadCountries()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   return (
     <main className="form-page">
       <section className="form-page__hero">
@@ -36,12 +42,11 @@ function Form() {
         </h1>
         <p className="form-page__description">
           Centralizamos seus dados de contato para que nosso time possa
-          responder com mais precisão, agilidade e consistência desde a primeira
-          interação.
+          responder com mais precisão, agilidade e consistância desde a primeira interação.
         </p>
       </section>
 
-      <CountryForm countries={mockedCountries} />
+      <CountryForm countries={countries} />
     </main>
   )
 }
