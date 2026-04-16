@@ -140,7 +140,7 @@ function CountryForm({ countries }: CountryFormProps) {
               onChange={(event) => handleFieldChange('email', event.target.value)}
             />
           </label>
-O
+
           <label className="country-form__field">
             <span>Telefone (WhatsApp)</span>
 
