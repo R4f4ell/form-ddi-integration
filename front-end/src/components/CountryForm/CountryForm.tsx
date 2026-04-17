@@ -63,6 +63,8 @@ function sanitizeNameValue(value: string) {
 function CountryForm({ countries }: CountryFormProps) {
   const formId = useId()
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([])
   const [formData, setFormData] = useState<FormState>(() =>
     initialFormState(countries),
   )
@@ -74,6 +76,10 @@ function CountryForm({ countries }: CountryFormProps) {
     countries.find((country) => country.ddi === formData.countryDdi) ??
     countries[0] ??
     null
+  const selectedCountryIndex = countries.findIndex(
+    (country) => country.ddi === formData.countryDdi,
+  )
+  const activeCountryIndex = selectedCountryIndex >= 0 ? selectedCountryIndex : 0
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -120,6 +126,14 @@ function CountryForm({ countries }: CountryFormProps) {
     }
   }, [toastMessage])
 
+  useEffect(() => {
+    if (!isCountryMenuOpen) {
+      return
+    }
+
+    optionRefs.current[activeCountryIndex]?.focus()
+  }, [activeCountryIndex, isCountryMenuOpen])
+
   function handleFieldChange(field: keyof FormState, value: string) {
     setFormData((currentState) => ({
       ...currentState,
@@ -142,6 +156,66 @@ function CountryForm({ countries }: CountryFormProps) {
   function handleCountrySelect(ddi: string) {
     handleFieldChange('countryDdi', ddi)
     setIsCountryMenuOpen(false)
+    triggerRef.current?.focus()
+  }
+
+  function focusCountryOption(index: number) {
+    if (!countries.length) {
+      return
+    }
+
+    const normalizedIndex = (index + countries.length) % countries.length
+    optionRefs.current[normalizedIndex]?.focus()
+  }
+
+  function handleTriggerKeyDown(event: React.KeyboardEvent<HTMLButtonElement>) {
+    if (!countries.length) {
+      return
+    }
+
+    if (
+      event.key === 'ArrowDown' ||
+      event.key === 'ArrowUp' ||
+      event.key === 'Enter' ||
+      event.key === ' '
+    ) {
+      event.preventDefault()
+      setIsCountryMenuOpen(true)
+    }
+  }
+
+  function handleDropdownKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (!countries.length) {
+      return
+    }
+
+    const focusedIndex = optionRefs.current.findIndex(
+      (option) => option === document.activeElement,
+    )
+    const currentIndex = focusedIndex >= 0 ? focusedIndex : activeCountryIndex
+
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      setIsCountryMenuOpen(false)
+      triggerRef.current?.focus()
+      return
+    }
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      focusCountryOption(currentIndex + 1)
+      return
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      focusCountryOption(currentIndex - 1)
+      return
+    }
+
+    if (event.key === 'Tab') {
+      setIsCountryMenuOpen(false)
+    }
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -239,12 +313,17 @@ function CountryForm({ countries }: CountryFormProps) {
             <div className="country-form__phone-shell" ref={dropdownRef}>
               <button
                 type="button"
+                ref={triggerRef}
                 className={`country-form__country-trigger${
                   isCountryMenuOpen ? ' country-form__country-trigger--open' : ''
                 }`}
                 onClick={() => setIsCountryMenuOpen((currentState) => !currentState)}
+                onKeyDown={handleTriggerKeyDown}
                 aria-expanded={isCountryMenuOpen}
+                aria-haspopup="listbox"
                 aria-label="Selecionar DDI"
+                aria-controls={`${formId}-country-listbox`}
+                disabled={!countries.length}
               >
                 {selectedCountry?.flag ? (
                   <img
@@ -275,17 +354,35 @@ function CountryForm({ countries }: CountryFormProps) {
               />
 
               {isCountryMenuOpen ? (
-                <div className="country-form__country-dropdown" role="listbox">
-                  {countries.map((country) => (
+                <div
+                  id={`${formId}-country-listbox`}
+                  className="country-form__country-dropdown"
+                  role="listbox"
+                  aria-label="Lista de paises"
+                  aria-activedescendant={
+                    countries[activeCountryIndex]
+                      ? `${formId}-country-option-${activeCountryIndex}`
+                      : undefined
+                  }
+                  onKeyDown={handleDropdownKeyDown}
+                >
+                  {countries.map((country, index) => (
                     <button
+                      id={`${formId}-country-option-${index}`}
                       key={`${country.name}-${country.ddi}`}
                       type="button"
+                      ref={(element) => {
+                        optionRefs.current[index] = element
+                      }}
                       className={`country-form__country-option${
                         country.ddi === formData.countryDdi
                           ? ' country-form__country-option--active'
                           : ''
                       }`}
                       onClick={() => handleCountrySelect(country.ddi)}
+                      role="option"
+                      aria-selected={country.ddi === formData.countryDdi}
+                      tabIndex={country.ddi === formData.countryDdi ? 0 : -1}
                     >
                       <span className="country-form__country-option-main">
                         {country.flag ? (
