@@ -1,6 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react'
 
 import './CountryForm.scss'
+import { FORM_MESSAGES } from '../../constants/formMessages'
+import {
+  type FormErrors,
+  hasFormErrors,
+  normalizeFormValues,
+  validateForm,
+} from '../../utils/formValidation'
 
 export type CountryOption = {
   name: string
@@ -17,6 +24,12 @@ type FormState = {
   email: string
   phone: string
   countryDdi: string
+}
+
+const initialFormErrors: FormErrors = {
+  name: null,
+  email: null,
+  phone: null,
 }
 
 function getDefaultCountryDdi(countries: CountryOption[]) {
@@ -48,13 +61,19 @@ function formatPhoneValue(value: string) {
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
 }
 
+function sanitizeNameValue(value: string) {
+  return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '')
+}
+
 function CountryForm({ countries }: CountryFormProps) {
   const formId = useId()
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const [formData, setFormData] = useState<FormState>(() =>
     initialFormState(countries),
   )
+  const [formErrors, setFormErrors] = useState<FormErrors>(initialFormErrors)
   const [isCountryMenuOpen, setIsCountryMenuOpen] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
   const selectedCountry =
     countries.find((country) => country.ddi === formData.countryDdi) ??
@@ -92,11 +111,37 @@ function CountryForm({ countries }: CountryFormProps) {
     })
   }, [countries])
 
+  useEffect(() => {
+    if (!toastMessage) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setToastMessage('')
+    }, 2800)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [toastMessage])
+
   function handleFieldChange(field: keyof FormState, value: string) {
     setFormData((currentState) => ({
       ...currentState,
-      [field]: field === 'phone' ? formatPhoneValue(value) : value,
+      [field]:
+        field === 'phone'
+          ? formatPhoneValue(value)
+          : field === 'name'
+            ? sanitizeNameValue(value)
+            : value,
     }))
+
+    if (field === 'name' || field === 'email' || field === 'phone') {
+      setFormErrors((currentState) => ({
+        ...currentState,
+        [field]: null,
+      }))
+    }
   }
 
   function handleCountrySelect(ddi: string) {
@@ -106,6 +151,25 @@ function CountryForm({ countries }: CountryFormProps) {
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    const normalizedValues = normalizeFormValues({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    })
+    const errors = validateForm(normalizedValues)
+
+    setFormData((currentState) => ({
+      ...currentState,
+      ...normalizedValues,
+    }))
+    setFormErrors(errors)
+
+    if (hasFormErrors(errors)) {
+      return
+    }
+
+    setToastMessage(FORM_MESSAGES.submitSuccess)
   }
 
   return (
@@ -122,27 +186,60 @@ function CountryForm({ countries }: CountryFormProps) {
 
         <form className="country-form" onSubmit={handleSubmit}>
           <label className="country-form__field">
-            <span>Nome</span>
+            <span className="country-form__field-head">
+              <span>Nome</span>
+              <span className="country-form__field-error-slot">
+                {formErrors.name ? (
+                  <span id={`${formId}-name-error`} className="country-form__field-error">
+                    {formErrors.name}
+                  </span>
+                ) : null}
+              </span>
+            </span>
             <input
               type="text"
               placeholder="Seu nome completo"
               value={formData.name}
               onChange={(event) => handleFieldChange('name', event.target.value)}
+              aria-invalid={Boolean(formErrors.name)}
+              aria-describedby={formErrors.name ? `${formId}-name-error` : undefined}
+              maxLength={25}
             />
           </label>
 
           <label className="country-form__field">
-            <span>E-mail</span>
+            <span className="country-form__field-head">
+              <span>E-mail</span>
+              <span className="country-form__field-error-slot">
+                {formErrors.email ? (
+                  <span id={`${formId}-email-error`} className="country-form__field-error">
+                    {formErrors.email}
+                  </span>
+                ) : null}
+              </span>
+            </span>
             <input
               type="email"
               placeholder="Ex: nome@empresa.com"
               value={formData.email}
               onChange={(event) => handleFieldChange('email', event.target.value)}
+              aria-invalid={Boolean(formErrors.email)}
+              aria-describedby={formErrors.email ? `${formId}-email-error` : undefined}
+              maxLength={60}
             />
           </label>
 
           <label className="country-form__field">
-            <span>Telefone (WhatsApp)</span>
+            <span className="country-form__field-head">
+              <span>Telefone (WhatsApp)</span>
+              <span className="country-form__field-error-slot">
+                {formErrors.phone ? (
+                  <span id={`${formId}-phone-error`} className="country-form__field-error">
+                    {formErrors.phone}
+                  </span>
+                ) : null}
+              </span>
+            </span>
 
             <div className="country-form__phone-shell" ref={dropdownRef}>
               <button
@@ -178,6 +275,8 @@ function CountryForm({ countries }: CountryFormProps) {
                 placeholder="(99) 99999-9999"
                 value={formData.phone}
                 onChange={(event) => handleFieldChange('phone', event.target.value)}
+                aria-invalid={Boolean(formErrors.phone)}
+                aria-describedby={formErrors.phone ? `${formId}-phone-error` : undefined}
               />
 
               {isCountryMenuOpen ? (
@@ -223,6 +322,12 @@ function CountryForm({ countries }: CountryFormProps) {
             Enviar
           </button>
         </form>
+
+        {toastMessage ? (
+          <div className="country-form__toast" role="status" aria-live="polite">
+            {toastMessage}
+          </div>
+        ) : null}
       </div>
     </section>
   )
