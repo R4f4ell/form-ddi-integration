@@ -1,6 +1,7 @@
-import type { CountryOption } from '../components/CountryForm/CountryForm'
+import type { CountryOption } from '../types/country'
 
-const COUNTRIES_ENDPOINT = '/countries'
+const API_URL = import.meta.env.VITE_API_URL?.trim() ?? ''
+const COUNTRIES_ENDPOINT = `${API_URL}/countries`
 
 let countriesRequest: Promise<CountryOption[]> | null = null
 

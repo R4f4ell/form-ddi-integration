@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 
-import CountryForm, {
-  type CountryOption,
-} from '../components/CountryForm/CountryForm'
+import CountryForm from '../components/CountryForm/CountryForm'
 import { getCountries } from '../lib/lib_api'
+import type { CountryOption } from '../types/country'
 import '../styles/global.scss'
 
 function Form() {

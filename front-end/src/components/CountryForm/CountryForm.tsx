@@ -2,18 +2,13 @@ import { useEffect, useId, useRef, useState } from 'react'
 
 import './CountryForm.scss'
 import { FORM_MESSAGES } from '../../constants/formMessages'
+import type { CountryOption } from '../../types/country'
 import {
   type FormErrors,
   hasFormErrors,
   normalizeFormValues,
   validateForm,
 } from '../../utils/formValidation'
-
-export type CountryOption = {
-  name: string
-  ddi: string
-  flag: string | null
-}
 
 type CountryFormProps = {
   countries: CountryOption[]
