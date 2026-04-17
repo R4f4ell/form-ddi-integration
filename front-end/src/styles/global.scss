@@ -8,12 +8,14 @@
 
 html {
   font-size: 16px;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: clip;
   background:
     radial-gradient(circle at 8% 18%, rgba(135, 151, 164, 0.28), transparent 20%),
     radial-gradient(circle at 88% 16%, rgba(201, 191, 176, 0.32), transparent 18%),
@@ -37,6 +39,7 @@ select {
 
 #root {
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 .form-page {
@@ -48,7 +51,16 @@ select {
   min-height: 100vh;
   margin: 0 auto;
   padding: 3rem 1.5rem;
+  overflow: clip;
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+
+.form-page [data-aos='fade-up'] {
+  transform: translate3d(0, 24px, 0);
+}
+
+.form-page [data-aos='fade-up'].aos-animate {
+  transform: translate3d(0, 0, 0);
 }
 
 .form-page::before,
@@ -123,6 +135,22 @@ select {
   color: rgba(180, 35, 24, 0.82);
 }
 
+.form-page__toast {
+  position: fixed;
+  top: 0.35rem;
+  right: 0.35rem;
+  z-index: 40;
+  padding: 0.9rem 1.1rem;
+  border-radius: 0.9rem;
+  background: rgba(29, 42, 54, 0.96);
+  color: #f7f5f1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 18px 42px rgba(20, 34, 48, 0.2);
+  width: max-content;
+  max-width: min(22rem, calc(100vw - 1rem));
+}
+
 @media (max-width: 920px) {
   .form-page {
     padding-block: 2rem;
@@ -136,5 +164,11 @@ select {
   .form-page__feedback {
     grid-column: auto;
     margin: -1rem 0 -1.15rem;
+  }
+
+  .form-page__toast {
+    top: 0.25rem;
+    right: 0.25rem;
+    max-width: min(22rem, calc(100vw - 0.5rem));
   }
 }

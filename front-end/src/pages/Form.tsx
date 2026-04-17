@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
 
 import CountryForm from '../components/CountryForm/CountryForm'
 import { getCountries } from '../lib/lib_api'
@@ -9,6 +11,17 @@ function Form() {
   const [countries, setCountries] = useState<CountryOption[]>([])
   const [isLoadingCountries, setIsLoadingCountries] = useState(true)
   const [countriesError, setCountriesError] = useState('')
+  const [toastMessage, setToastMessage] = useState('')
+
+  useEffect(() => {
+    AOS.init({
+      duration: 850,
+      easing: 'ease-out-cubic',
+      once: true,
+      offset: 24,
+      anchorPlacement: 'top-bottom',
+    })
+  }, [])
 
   useEffect(() => {
     let isMounted = true
@@ -45,11 +58,37 @@ function Form() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!isLoadingCountries) {
+      AOS.refresh()
+    }
+  }, [isLoadingCountries])
+
+  useEffect(() => {
+    if (!toastMessage) {
+      return
+    }
+
+    AOS.refreshHard()
+
+    const timeoutId = window.setTimeout(() => {
+      setToastMessage('')
+    }, 2800)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [toastMessage])
+
   return (
     <main className="form-page">
       {!isLoadingCountries ? (
         <>
-          <section className="form-page__hero">
+          <section
+            className="form-page__hero"
+            data-aos="fade-up"
+            data-aos-delay="0"
+          >
             <p className="form-page__eyebrow">Atlas Ridge</p>
             <h1 className="form-page__title">
               Conversas relevantes começam com um contexto bem construido.
@@ -65,8 +104,21 @@ function Form() {
             </div>
           ) : null}
 
-          <CountryForm countries={countries} />
+          <CountryForm countries={countries} onSubmitSuccess={setToastMessage} />
         </>
+      ) : null}
+
+      {toastMessage ? (
+        <div
+          className="form-page__toast"
+          role="status"
+          aria-live="polite"
+          data-aos="fade-down"
+          data-aos-delay="0"
+          data-aos-duration="300"
+        >
+          {toastMessage}
+        </div>
       ) : null}
     </main>
   )

@@ -12,6 +12,7 @@ import {
 
 type CountryFormProps = {
   countries: CountryOption[]
+  onSubmitSuccess?: (message: string) => void
 }
 
 type FormState = {
@@ -60,7 +61,7 @@ function sanitizeNameValue(value: string) {
   return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '')
 }
 
-function CountryForm({ countries }: CountryFormProps) {
+function CountryForm({ countries, onSubmitSuccess }: CountryFormProps) {
   const formId = useId()
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
@@ -70,8 +71,6 @@ function CountryForm({ countries }: CountryFormProps) {
   )
   const [formErrors, setFormErrors] = useState<FormErrors>(initialFormErrors)
   const [isCountryMenuOpen, setIsCountryMenuOpen] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
-
   const selectedCountry =
     countries.find((country) => country.ddi === formData.countryDdi) ??
     countries[0] ??
@@ -111,20 +110,6 @@ function CountryForm({ countries }: CountryFormProps) {
       }
     })
   }, [countries])
-
-  useEffect(() => {
-    if (!toastMessage) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setToastMessage('')
-    }, 2800)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [toastMessage])
 
   useEffect(() => {
     if (!isCountryMenuOpen) {
@@ -238,11 +223,16 @@ function CountryForm({ countries }: CountryFormProps) {
       return
     }
 
-    setToastMessage(FORM_MESSAGES.submitSuccess)
+    onSubmitSuccess?.(FORM_MESSAGES.submitSuccess)
   }
 
   return (
-    <section className="country-form-section" aria-labelledby={`${formId}-title`}>
+    <section
+      className="country-form-section"
+      aria-labelledby={`${formId}-title`}
+      data-aos="fade-up"
+      data-aos-delay="140"
+    >
       <div className="country-form-section__shell">
         <div className="country-form-section__accent" />
 
@@ -353,60 +343,61 @@ function CountryForm({ countries }: CountryFormProps) {
                 aria-describedby={formErrors.phone ? `${formId}-phone-error` : undefined}
               />
 
-              {isCountryMenuOpen ? (
-                <div
-                  id={`${formId}-country-listbox`}
-                  className="country-form__country-dropdown"
-                  role="listbox"
-                  aria-label="Lista de paises"
-                  aria-activedescendant={
-                    countries[activeCountryIndex]
-                      ? `${formId}-country-option-${activeCountryIndex}`
-                      : undefined
-                  }
-                  onKeyDown={handleDropdownKeyDown}
-                >
-                  {countries.map((country, index) => (
-                    <button
-                      id={`${formId}-country-option-${index}`}
-                      key={`${country.name}-${country.ddi}`}
-                      type="button"
-                      ref={(element) => {
-                        optionRefs.current[index] = element
-                      }}
-                      className={`country-form__country-option${
-                        country.ddi === formData.countryDdi
-                          ? ' country-form__country-option--active'
-                          : ''
-                      }`}
-                      onClick={() => handleCountrySelect(country.ddi)}
-                      role="option"
-                      aria-selected={country.ddi === formData.countryDdi}
-                      tabIndex={country.ddi === formData.countryDdi ? 0 : -1}
-                    >
-                      <span className="country-form__country-option-main">
-                        {country.flag ? (
-                          <img
-                            src={country.flag}
-                            alt={country.name}
-                            className="country-form__country-option-flag"
-                          />
-                        ) : (
-                          <span className="country-form__country-option-flag country-form__country-option-flag--placeholder" />
-                        )}
+              <div
+                id={`${formId}-country-listbox`}
+                className={`country-form__country-dropdown${
+                  isCountryMenuOpen ? ' country-form__country-dropdown--open' : ''
+                }`}
+                role="listbox"
+                aria-label="Lista de paises"
+                aria-hidden={!isCountryMenuOpen}
+                aria-activedescendant={
+                  countries[activeCountryIndex]
+                    ? `${formId}-country-option-${activeCountryIndex}`
+                    : undefined
+                }
+                onKeyDown={handleDropdownKeyDown}
+              >
+                {countries.map((country, index) => (
+                  <button
+                    id={`${formId}-country-option-${index}`}
+                    key={`${country.name}-${country.ddi}`}
+                    type="button"
+                    ref={(element) => {
+                      optionRefs.current[index] = element
+                    }}
+                    className={`country-form__country-option${
+                      country.ddi === formData.countryDdi
+                        ? ' country-form__country-option--active'
+                        : ''
+                    }`}
+                    onClick={() => handleCountrySelect(country.ddi)}
+                    role="option"
+                    aria-selected={country.ddi === formData.countryDdi}
+                    tabIndex={isCountryMenuOpen && country.ddi === formData.countryDdi ? 0 : -1}
+                  >
+                    <span className="country-form__country-option-main">
+                      {country.flag ? (
+                        <img
+                          src={country.flag}
+                          alt={country.name}
+                          className="country-form__country-option-flag"
+                        />
+                      ) : (
+                        <span className="country-form__country-option-flag country-form__country-option-flag--placeholder" />
+                      )}
 
-                        <span className="country-form__country-option-name">
-                          {country.name}
-                        </span>
+                      <span className="country-form__country-option-name">
+                        {country.name}
                       </span>
+                    </span>
 
-                      <span className="country-form__country-option-ddi">
-                        {country.ddi}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+                    <span className="country-form__country-option-ddi">
+                      {country.ddi}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           </label>
 
@@ -414,12 +405,6 @@ function CountryForm({ countries }: CountryFormProps) {
             Solicitar contato
           </button>
         </form>
-
-        {toastMessage ? (
-          <div className="country-form__toast" role="status" aria-live="polite">
-            {toastMessage}
-          </div>
-        ) : null}
       </div>
     </section>
   )
