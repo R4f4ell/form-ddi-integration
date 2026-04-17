@@ -8,20 +8,33 @@ import '../styles/global.scss'
 
 function Form() {
   const [countries, setCountries] = useState<CountryOption[]>([])
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true)
+  const [countriesError, setCountriesError] = useState('')
 
   useEffect(() => {
     let isMounted = true
 
     async function loadCountries() {
+      if (isMounted) {
+        setIsLoadingCountries(true)
+        setCountriesError('')
+      }
+
       try {
         const countriesResponse = await getCountries()
 
         if (isMounted) {
           setCountries(countriesResponse)
+          setCountriesError('')
         }
       } catch {
         if (isMounted) {
           setCountries([])
+          setCountriesError('Nao foi possivel carregar os paises agora.')
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingCountries(false)
         }
       }
     }
@@ -35,18 +48,28 @@ function Form() {
 
   return (
     <main className="form-page">
-      <section className="form-page__hero">
-        <p className="form-page__eyebrow">Atlas Ridge</p>
-        <h1 className="form-page__title">
-          Conversas relevantes começam com um contexto bem construído.
-        </h1>
-        <p className="form-page__description">
-          Centralizamos seus dados de contato para que nosso time possa
-          responder com mais precisão, agilidade e consistância desde a primeira interação.
-        </p>
-      </section>
+      {!isLoadingCountries ? (
+        <>
+          <section className="form-page__hero">
+            <p className="form-page__eyebrow">Atlas Ridge</p>
+            <h1 className="form-page__title">
+              Conversas relevantes comecam com um contexto bem construido.
+            </h1>
+            <p className="form-page__description">
+              Centralizamos seus dados de contato para que nosso time possa
+              responder com mais precisao, agilidade e consistencia desde a primeira interacao.
+            </p>
+          </section>
 
-      <CountryForm countries={countries} />
+          {countriesError ? (
+            <div className="form-page__feedback form-page__feedback--error" role="alert">
+              {countriesError}
+            </div>
+          ) : null}
+
+          <CountryForm countries={countries} />
+        </>
+      ) : null}
     </main>
   )
 }

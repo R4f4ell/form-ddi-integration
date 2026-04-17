@@ -111,6 +111,18 @@ select {
   line-height: 1.7;
 }
 
+.form-page__feedback {
+  grid-column: 2;
+  margin: -1rem 0 -1.15rem;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.form-page__feedback--error {
+  color: rgba(180, 35, 24, 0.82);
+}
+
 @media (max-width: 920px) {
   .form-page {
     padding-block: 2rem;
@@ -119,5 +131,10 @@ select {
 
   .form-page__hero {
     max-width: none;
+  }
+
+  .form-page__feedback {
+    grid-column: auto;
+    margin: -1rem 0 -1.15rem;
   }
 }
