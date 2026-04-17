@@ -52,11 +52,10 @@ function Form() {
           <section className="form-page__hero">
             <p className="form-page__eyebrow">Atlas Ridge</p>
             <h1 className="form-page__title">
-              Conversas relevantes comecam com um contexto bem construido.
+              Conversas relevantes começam com um contexto bem construido.
             </h1>
             <p className="form-page__description">
-              Centralizamos seus dados de contato para que nosso time possa
-              responder com mais precisao, agilidade e consistencia desde a primeira interacao.
+              Organize suas informações para que nossa equipe entenda sua necessidade com mais rapidez e precisão.
             </p>
           </section>
 

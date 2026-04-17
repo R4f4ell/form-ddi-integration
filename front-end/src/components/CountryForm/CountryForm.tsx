@@ -249,14 +249,14 @@ function CountryForm({ countries }: CountryFormProps) {
         <div className="country-form-section__header">
           <p className="country-form-section__label">Preencha o Formulário</p>
           <h2 id={`${formId}-title`} className="country-form-section__title">
-            Estamos prontos para entender sua necessidade
+            Conte-nos o que você precisa
           </h2>
         </div>
 
         <form className="country-form" onSubmit={handleSubmit}>
           <label className="country-form__field">
             <span className="country-form__field-head">
-              <span>Nome</span>
+              <span>Nome Completo</span>
               <span className="country-form__field-error-slot">
                 {formErrors.name ? (
                   <span id={`${formId}-name-error`} className="country-form__field-error">
@@ -267,7 +267,7 @@ function CountryForm({ countries }: CountryFormProps) {
             </span>
             <input
               type="text"
-              placeholder="Seu nome completo"
+              placeholder="Digite seu nome completo"
               value={formData.name}
               onChange={(event) => handleFieldChange('name', event.target.value)}
               aria-invalid={Boolean(formErrors.name)}
@@ -278,7 +278,7 @@ function CountryForm({ countries }: CountryFormProps) {
 
           <label className="country-form__field">
             <span className="country-form__field-head">
-              <span>E-mail</span>
+              <span>Seu e-mail</span>
               <span className="country-form__field-error-slot">
                 {formErrors.email ? (
                   <span id={`${formId}-email-error`} className="country-form__field-error">
@@ -289,7 +289,7 @@ function CountryForm({ countries }: CountryFormProps) {
             </span>
             <input
               type="email"
-              placeholder="Ex: nome@empresa.com"
+              placeholder="Digite seu e-mail principal"
               value={formData.email}
               onChange={(event) => handleFieldChange('email', event.target.value)}
               aria-invalid={Boolean(formErrors.email)}
@@ -411,7 +411,7 @@ function CountryForm({ countries }: CountryFormProps) {
           </label>
 
           <button type="submit" className="country-form__button">
-            Enviar
+            Solicitar contato
           </button>
         </form>
 

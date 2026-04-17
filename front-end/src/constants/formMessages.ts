@@ -1,6 +1,6 @@
 export const FORM_MESSAGES = {
-  nameInvalid: 'Nome invalido',
-  emailInvalid: 'Email invalido',
-  phoneInvalid: 'Telefone invalido',
-  submitSuccess: 'Formulario enviado com sucesso.',
+  nameInvalid: 'Nome inválido',
+  emailInvalid: 'Email inválido',
+  phoneInvalid: 'Telefone inválido',
+  submitSuccess: 'Formulário enviado com sucesso!',
 } as const
