@@ -10,7 +10,6 @@ import '../styles/global.scss'
 function Form() {
   const [countries, setCountries] = useState<CountryOption[]>([])
   const [isLoadingCountries, setIsLoadingCountries] = useState(true)
-  const [countriesError, setCountriesError] = useState('')
   const [toastMessage, setToastMessage] = useState('')
 
   useEffect(() => {
@@ -29,7 +28,6 @@ function Form() {
     async function loadCountries() {
       if (isMounted) {
         setIsLoadingCountries(true)
-        setCountriesError('')
       }
 
       try {
@@ -37,12 +35,12 @@ function Form() {
 
         if (isMounted) {
           setCountries(countriesResponse)
-          setCountriesError('')
         }
-      } catch {
+      } catch (error) {
+        console.error('Erro ao carregar paises:', error)
+
         if (isMounted) {
           setCountries([])
-          setCountriesError('Nao foi possivel carregar os paises agora.')
         }
       } finally {
         if (isMounted) {
@@ -97,12 +95,6 @@ function Form() {
               Organize suas informações para que nossa equipe entenda sua necessidade com mais rapidez e precisão.
             </p>
           </section>
-
-          {countriesError ? (
-            <div className="form-page__feedback form-page__feedback--error" role="alert">
-              {countriesError}
-            </div>
-          ) : null}
 
           <CountryForm countries={countries} onSubmitSuccess={setToastMessage} />
         </>

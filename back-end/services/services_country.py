@@ -1,17 +1,22 @@
 from asyncio import Lock
 from time import monotonic
 
-from httpx import AsyncClient
+from httpx import AsyncClient, HTTPError
 
+from core.core_config import (
+    COUNTRY_CODE_API_BASE_URL,
+    COUNTRY_CODE_API_COUNTRIES_ENDPOINT,
+    COUNTRY_OPTIONS_CACHE_TTL_SECONDS,
+)
 from schemas.schemas_country import CountryOptionSchema
-
-COUNTRY_CODE_API_BASE_URL = "https://country-code.com"
-COUNTRY_CODE_API_COUNTRIES_ENDPOINT = "/api/countries"
-COUNTRY_OPTIONS_CACHE_TTL_SECONDS = 1800
 
 _country_options_cache: list[CountryOptionSchema] = []
 _country_options_cache_expires_at = 0.0
 _country_options_cache_lock = Lock()
+
+
+class CountryServiceError(Exception):
+    pass
 
 
 async def get_country_options() -> list[CountryOptionSchema]:
@@ -35,11 +40,20 @@ async def get_country_options() -> list[CountryOptionSchema]:
 async def _fetch_country_options() -> list[CountryOptionSchema]:
     url = f"{COUNTRY_CODE_API_BASE_URL}{COUNTRY_CODE_API_COUNTRIES_ENDPOINT}"
 
-    async with AsyncClient(timeout=10.0) as client:
-        response = await client.get(url)
-        response.raise_for_status()
+    try:
+        async with AsyncClient(timeout=10.0) as client:
+            response = await client.get(url)
+            response.raise_for_status()
 
-    countries = response.json()
+        countries = response.json()
+    except (HTTPError, ValueError) as error:
+        raise CountryServiceError("Erro ao buscar paises na API externa.") from error
+
+    if not isinstance(countries, list):
+        raise CountryServiceError("Resposta invalida da API externa.")
+
+    if not all(isinstance(country, dict) for country in countries):
+        raise CountryServiceError("Resposta invalida da API externa.")
 
     return [normalize_country_item(country) for country in countries]
 

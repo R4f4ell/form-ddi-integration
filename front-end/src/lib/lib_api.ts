@@ -1,6 +1,6 @@
 import type { CountryOption } from '../types/country'
 
-const API_URL = import.meta.env.VITE_API_URL?.trim() ?? ''
+const API_URL = import.meta.env.VITE_API_URL?.trim() || '/api'
 const COUNTRIES_ENDPOINT = `${API_URL}/countries`
 
 let countriesRequest: Promise<CountryOption[]> | null = null
