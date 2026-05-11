@@ -23,7 +23,7 @@ http://127.0.0.1:8000/health
 
 ```powershell
 cd front-end
-npm ci
+npm install
 npm run dev
 ```
 
